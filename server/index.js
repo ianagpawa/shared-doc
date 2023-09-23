@@ -1,76 +1,88 @@
-const { WebSocket, WebSocketServer } = require('ws');
 const http = require('http');
+const { WebSocketServer, WebSocket } = require('ws');
 const uuidv4 = require('uuid').v4;
 
-// Spinning the http server and the WebSocket server.
 const server = http.createServer();
 const wsServer = new WebSocketServer({ server });
 const port = 8000;
 server.listen(port, () => {
-    console.log(`WebSocket server is running on port ${port}`);
+    console.log(`Websocket server is running on port ${port}`);
 });
 
-// I'm maintaining all active connections in this object
-const clients = {};
-// I'm maintaining all active users in this object
-const users = {};
-// The current editor content is maintained here.
-let editorContent = null;
-// User activity history.
-let userActivity = [];
+// Simple cache to maintain active connections
+const clients = {},
+// SImple cache to main active users
+    users = {};
 
-// Event types
-const typesDef = {
+// Maintains current editor
+let editorContent = null,
+// Audit of user activity
+    userActivity = [];
+
+
+const eventTypes = {
     USER_EVENT: 'userevent',
     CONTENT_CHANGE: 'contentchange'
-}
+};
 
 function broadcastMessage(json) {
-    // We are sending the current data to all connected clients
     const data = JSON.stringify(json);
+    // Sends message to all clients
     for(let userId in clients) {
         let client = clients[userId];
-        if(client.readyState === WebSocket.OPEN) {
-        client.send(data);
-        }
+        if (client.readyState === WebSocket.OPEN) { client.send(data); }
     };
 }
 
 function handleMessage(message, userId) {
-    const dataFromClient = JSON.parse(message.toString());
-    const json = { type: dataFromClient.type };
-    if (dataFromClient.type === typesDef.USER_EVENT) {
-        users[userId] = dataFromClient;
-        userActivity.push(`${dataFromClient.username} joined to edit the document`);
-        json.data = { users, userActivity };
-    } else if (dataFromClient.type === typesDef.CONTENT_CHANGE) {
-        editorContent = dataFromClient.content;
-        json.data = { editorContent, userActivity };
+    const dataFromClient = JSON.parse(message.toString()),
+        type = dataFromClient.type,
+        json = { type };
+    let data;
+    switch(type) {
+        // Updates user activity history
+        case eventTypes.USER_EVENT:
+            users[userId] = dataFromClient;
+            userActivity.push(`${dataFromClient.username} joined to edit the shared document.`);
+            data = { users, userActivity };
+            break;
+        // Updates content changes
+        case eventTypes.CONTENT_CHANGE:
+            editorContent = dataFromClient.content;
+            data = { editorContent, userActivity };
+            break;
+        default:
+            data = {};
     }
+    json.data = data;
     broadcastMessage(json);
 }
 
 function handleDisconnect(userId) {
     console.log(`${userId} disconnected.`);
-    const json = { type: typesDef.USER_EVENT };
-    const username = users[userId]?.username || userId;
+    const json = { type: eventTypes.USER_EVENT },
+        username = users[userId]?.username || userId;
+    // Adds event
     userActivity.push(`${username} left the document`);
-    json.data = { users, userActivity };
+    json.data = { users, userActivity }
+    // Deletes unused
     delete clients[userId];
     delete users[userId];
+
     broadcastMessage(json);
 }
 
-// A new client connection request received
-wsServer.on('connection', function(connection) {
-    // Generate a unique code for every user
+wsServer.on('connection', (connection) => {
+    // Unique identifier generated.
     const userId = uuidv4();
     console.log('Recieved a new connection');
 
-    // Store the new connection and handle messages
+    // Stores new connection.
     clients[userId] = connection;
     console.log(`${userId} connected.`);
-    connection.on('message', (message) => handleMessage(message, userId));
-    // User disconnected
+    
+    // Handles new messages
+    connection.on('message', (message) => handleMessage(message, userId) );
+    // Handles user disconnects
     connection.on('close', () => handleDisconnect(userId));
 });
