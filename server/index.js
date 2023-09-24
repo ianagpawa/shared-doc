@@ -52,7 +52,7 @@ function handleMessage(message, userId) {
             data = { editorContent, userActivity };
             break;
         default:
-            data = {};
+            return;
     }
     json.data = data;
     broadcastMessage(json);
