@@ -36,10 +36,10 @@ function App() {
 
     useEffect(() => {
         if(username && readyState === ReadyState.OPEN) {
-        sendJsonMessage({
-            username,
-            type: 'userevent'
-        });
+            sendJsonMessage({
+                username,
+                type: 'userevent'
+            });
         }
     }, [username, sendJsonMessage, readyState]);
 
@@ -49,8 +49,10 @@ function App() {
             <NavbarBrand href="/">Real-Time Shared Document Editor</NavbarBrand>
         </Navbar>
         <div className="container-fluid">
-            {username ? <EditorSection/>
-                : <LoginSection onLogin={setUsername}/> }
+            {username 
+                ? <EditorSection/>
+                : <LoginSection onLogin={setUsername}/> 
+            }
         </div>
         </>
     );
@@ -63,9 +65,7 @@ function LoginSection({ onLogin }) {
         filter: () => false
     });
     function logInUser() {
-        if(!username.trim()) {
-        return;
-        }
+        if(!username.trim()) { return; }
         onLogin && onLogin(username);
     }
 

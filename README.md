@@ -1,8 +1,6 @@
 # Shared Doc
 A simple collaborative document editing app built with React, Node and websockets.
 
-![](./media/preview.gif)
-
 ## How to run the app?
 
 ```bash
