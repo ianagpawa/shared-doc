@@ -12,14 +12,17 @@ import './App.css';
 
 const WS_URL = 'ws://127.0.0.1:8000';
 
-function isUserEvent(message) {
+function checkEventGeneric(message, type) {
     let evt = JSON.parse(message.data);
-    return evt.type === 'userevent';
+    return evt.type === type;
+}
+
+function isUserEvent(message) {
+    return checkEventGeneric(message, 'userevent');
 }
 
 function isDocumentEvent(message) {
-    let evt = JSON.parse(message.data);
-    return evt.type === 'contentchange';
+    return checkEventGeneric(message, 'contentchange');
 }
 
 function App() {
@@ -45,15 +48,15 @@ function App() {
 
     return (
         <>
-        <Navbar color="light" light>
-            <NavbarBrand href="/">Real-Time Shared Document Editor</NavbarBrand>
-        </Navbar>
-        <div className="container-fluid">
-            {username 
-                ? <EditorSection/>
-                : <LoginSection onLogin={setUsername}/> 
-            }
-        </div>
+            <Navbar color="light" light>
+                <NavbarBrand href="/">Real-Time Shared Document Editor</NavbarBrand>
+            </Navbar>
+            <div className="container-fluid">
+                {username 
+                    ? <EditorSection/>
+                    : <LoginSection onLogin={setUsername}/> 
+                }
+            </div>
         </>
     );
 }
@@ -65,8 +68,10 @@ function LoginSection({ onLogin }) {
         filter: () => false
     });
     function logInUser() {
-        if(!username.trim()) { return; }
-        onLogin && onLogin(username);
+        // Needed to remove trailing spaces from input
+        const trimmedUsername = username.trim();
+        if(!trimmedUsername) { return; }
+        onLogin && onLogin(trimmedUsername);
     }
 
     return (
@@ -108,16 +113,19 @@ function Users() {
         filter: isUserEvent
     });
     const users = Object.values(lastJsonMessage?.data.users || {});
-    return users.map(user => (
-        <div key={user.username}>
-        <span id={user.username} className="userInfo" key={user.username}>
-            <Avatar name={user.username} size={40} round="20px"/>
-        </span>
-        <UncontrolledTooltip placement="top" target={user.username}>
-            {user.username}
-        </UncontrolledTooltip>
-        </div>
-    ));
+    return users.map(user => {
+        const userKeyId =  user.username.split(' ').join('-');
+        return (
+            <div key={userKeyId}>
+                <span id={userKeyId} className="userInfo" key={userKeyId}>
+                    <Avatar name={user.username} size={40} round="20px"/>
+                </span>
+                <UncontrolledTooltip placement="top" target={userKeyId}>
+                    {user.username}
+                </UncontrolledTooltip>
+            </div>
+        );
+    });
 }
 
 function EditorSection() {
