@@ -4,8 +4,16 @@
     "private": true,
     "description": "",
     "main": "index.js",
+    "config": {
+        "port": "8000"
+    },
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "docker:build": "docker-compose -f docker-compose.server.yml build",
+        "docker:start": "docker-compose -f docker-compose.server.yml up",
+        "docker:stop": "docker-compose -f docker-compose.server.yml stop",
+        "docker:clean": "docker-compose -f docker-compose.server.yml down",
+        "docker:stop:clean": "npm run docker:stop && npm run docker:clean"
     },
     "author": "ian.agpawa",
     "license": "ISC",

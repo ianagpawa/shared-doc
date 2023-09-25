@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   app:
-    container_name: shared-docs-client
+    container_name: shared-docs-server
     build:
       context: .
       target: development
     volumes:
-      - ./src:/app/src
+      - ./:/server/src
     ports:
-      - 3000:3000
+      - 8000:8000
