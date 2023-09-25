@@ -9,7 +9,12 @@
         "start": "npm-run-all -p -r start:server start:client",
         "install:client": "cd client && npm run install",
         "install:server": "cd server && npm run install",
-        "install": "npm-run-all -p -r install:server install:client"
+        "install": "npm-run-all -p -r install:server install:client",
+        "docker:build": "docker-compose -f docker-compose.yml build",
+        "docker:start": "docker-compose -f docker-compose.yml up",
+        "docker:stop": "docker-compose -f docker-compose.yml stop",
+        "docker:clean": "docker-compose -f docker-compose.yml down",
+        "docker:stop:clean": "npm run docker:stop && npm run docker:clean"
     },
     "author": "ian.agpawa",
     "license": "ISC",

@@ -19,12 +19,7 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "docker:build": "docker-compose -f docker-compose.client.yml build",
-        "docker:start": "docker-compose -f docker-compose.client.yml up",
-        "docker:stop": "docker-compose -f docker-compose.client.yml stop",
-        "docker:clean": "docker-compose -f docker-compose.client.yml down",
-        "docker:stop:clean": "npm run docker:stop && npm run docker:clean"
+        "eject": "react-scripts eject"
     },
     "eslintConfig": {
         "extends": [

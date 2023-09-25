@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  client:
+    container_name: client
+    build:
+      context: ./client
+      target: development
+    volumes:
+      - ./client/src:/app/src
+    ports:
+      - 3000:3000
+  server:
+    container_name: server
+    build:
+      context: ./server
+      target: development
+    volumes:
+      - ./server/:/server/src
+    ports:
+      - 8000:8000
